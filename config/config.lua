@@ -30,6 +30,7 @@ Config.UniqueGarages = true --can only retrieve vehicles from the (public) garag
 
 Config.WarpIntoVehicle = true --warp into driver seat when vehicle spawns
 
+Config.StoreOutsideVehiclesOnRestart = true --any vehicle not marked as stored will be set back into its garage on server restart
 Config.DefaultGarage = 'legion' --default garage to set a vehicle to if its last garage is not found
 Config.ImpoundOnRestart = false --vehicles left out on the street will be sent to impound on server restart
 Config.DefaultImpoundGarage = 'state_impound' --impound garage to send vehicles to if impounded on server restart
