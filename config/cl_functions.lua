@@ -1,20 +1,19 @@
+---@param garageData { name: string, label: string, garageType: string, vehicleType: string }
 function hasPropertyKeys(garageData)
-    ---@param garageData table: {name string, label string, garageType string, vehicleType string}
 
     return false
 end
 
+---@param garageData { name: string, label: string, garageType: string, vehicleType: string }
 function customAuth(garageData)
-    ---@param garageData table: {name string, label string, garageType string, vehicleType string}
 
     return false
 end
 
+---@param vehicle number vehicle entity id
+---@param plate string vehicle plate 
+---@param fakePlate string|boolean fake plate if vehicle has one or false
 function hasKeys(vehicle, plate, fakePlate)
-    ---@param vehicle number vehicle entity id
-    ---@param plate string vehicle plate 
-    ---@param fakePlate string or false fake plate if vehicle has one
-
     if GetResourceState('mk_vehiclekeys') == 'started' then 
         return exports['mk_vehiclekeys']:HasKey(vehicle)
     elseif GetResourceState('qb-vehiclekeys') == 'started' then
@@ -29,11 +28,10 @@ function hasKeys(vehicle, plate, fakePlate)
     end
 end
 
+---@param vehicle number vehicle entity id
+---@param plate string vehicle plate 
+---@param fakePlate string|boolean fake plate if vehicle has one or false
 function giveKeys(vehicle, plate, fakePlate)
-    ---@param vehicle number vehicle entity id
-    ---@param plate string vehicle plate 
-    ---@param fakePlate string or false fake plate if vehicle has one
-
     if GetResourceState('mk_vehiclekeys') == 'started' then 
         exports['mk_vehiclekeys']:AddKey(vehicle)
     elseif GetResourceState('qb-vehiclekeys') == 'started' then 
@@ -47,44 +45,44 @@ function giveKeys(vehicle, plate, fakePlate)
     end
 end
 
+---@param vehicle number vehicle entity id
 function getFuel(vehicle)
-    ---@param vehicle number vehicle entity id
-
     if GetResourceState('LegacyFuel') == 'started' then 
         return exports['LegacyFuel']:GetFuel(vehicle)
     elseif GetResourceState('ox_fuel') == 'started' then 
         return Entity(vehicle).state.fuel 
+    elseif GetResourceState('cdn-fuel') == 'started' then 
+        return exports['cdn-fuel']:GetFuel(vehicle)
     else
         --custom fuel check
         return 50
     end
 end
 
+---@param vehicle number vehicle entity id
+---@param level number fuel level to set
 function setFuel(vehicle, level)
-    ---@param vehicle number vehicle entity id
-    ---@param level number fuel level to set
-
     if GetResourceState('LegacyFuel') == 'started' then 
         exports['LegacyFuel']:SetFuel(vehicle, level)
     elseif GetResourceState('ox_fuel') == 'started' then 
         Entity(vehicle).state:set('fuel', level, true)
+    elseif GetResourceState('cdn-fuel') == 'started' then 
+        exports['cdn-fuel']:SetFuel(vehicle, level)
     else 
         --custom fuel set
     end 
 end
 
+---@param vehicle number vehicle entity id
 function getMods(vehicle)
-    ---@param vehicle number vehicle entity id
-
     return lib.getVehicleProperties(vehicle)
 end
 
+---@param vehicle number vehicle entity id
+---@param mods table vehicle mods
+---@param plate string vehicle plate 
+---@param fakePlate string|boolean fake plate if vehicle has one or false
 function setMods(vehicle, mods, plate, fakePlate)
-    ---@param vehicle number vehicle entity id
-    ---@param mods table vehicle mods
-    ---@param plate string vehicle plate 
-    ---@param fakePlate string or false fake plate if vehicle has one
-
     if fakePlate then 
         mods.plate = fakePlate 
         lib.setVehicleProperties(vehicle, mods)
@@ -93,9 +91,8 @@ function setMods(vehicle, mods, plate, fakePlate)
     end
 end
 
+---@param class number vehicle class
 function getVehicleClassIcon(class)
-    ---@param class number vehicle class
-
     local icon = 'car-side'
     if class then 
         if class == 8 then 
@@ -118,12 +115,11 @@ function getVehicleClassIcon(class)
     return icon
 end
 
+---@param jobName string job name
+---@param vehicleName string vehicle spawn code
+---@param vehicleModel number vehicle model number
+---@param playerData table player data for client to check
 function jobGarageAuth(jobName, vehicleName, vehicleModel, playerData)
-    ---@param jobName string job name
-    ---@param vehicleName string vehicle spawn code
-    ---@param vehicleModel number vehicle model number
-    ---@param playerData table player data for client to check
-    
     if vehicleName == 'polmav' then 
         --license check?
     end
