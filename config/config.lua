@@ -93,12 +93,92 @@ Config.TextUI = { --ox_lib
     }
 }
 
-Config.RadialMenu = { --ox_lib
+Config.RadialMenu = {
     Enable = true, --generate radial menu options when inside a garage zone
     MainIcon = 'warehouse',
     RetrieveIcon = 'magnifying-glass',
-    StoreIcon = 'warehouse'
+    StoreIcon = 'warehouse',
+
+    ---@param garageId number Current garage id
+    ---@param items { icon: string (icon name), label: string (radial option label), onSelect: function (function to run on select) }
+    AddRadial = function(self, garageId, items)
+        if GetResourceState('qb-radialmenu') == 'started' then
+            --qb-radialmenu
+
+            local radialItems = {}
+            for key, value in pairs(items) do 
+                if value.label == locale('radial_retrieve') then
+                    table.insert(radialItems, {
+                        id = 'openGarage',
+                        title = locale('radial_retrieve'),
+                        icon = self.RetrieveIcon,
+                        type = 'client',
+                        event = 'mk_garage:client:radialOpenGarage',
+                        shouldClose = true
+                    })
+                elseif value.label == locale('radial_store') then 
+                    table.insert(radialItems, {
+                        id = 'closeGarage',
+                        title = locale('radial_store'),
+                        icon = self.StoreIcon,
+                        type = 'client',
+                        event = 'mk_garage:client:radialStoreVehicle',
+                        shouldClose = true
+                    })
+                end
+            end
+
+            self.menuId = exports['qb-radialmenu']:AddOption({
+                title = locale('radial_main_garage'),
+                icon = self.MainIcon,
+                items = radialItems
+            })
+        else
+            --ox_lib radial menu
+
+            lib.registerRadial({
+                id = 'mk_garage_'..garageId..'_submenu',
+                items = items
+            })
+
+            lib.addRadialItem({
+                id = 'mk_garage_'..garageId,
+                icon = self.MainIcon,
+                label = locale('radial_main_garage'),
+                menu = 'mk_garage_'..garageId..'_submenu'
+            })
+        end
+    end,
+
+    ---@param garageId number Current garage id
+    RemoveRadial = function(self, garageId)
+        if GetResourceState('qb-radialmenu') == 'started' then
+            exports['qb-radialmenu']:RemoveOption(self.menuId)
+        else
+            --ox_lib
+            lib.removeRadialItem('mk_garage_'..garageId)
+        end
+    end,
+
+    HideRadial = function(self)
+        if GetResourceState('qb-radialmenu') == 'started' then
+            --no event for qb-radialmenu
+        else
+            --ox_lib
+            lib.hideRadial()
+        end
+    end
 }
+
+if not IsDuplicityVersion() then --client only
+    RegisterNetEvent('mk_garage:client:radialOpenGarage', function()
+        openGarage()
+    end)
+
+    RegisterNetEvent('mk_garage:client:radialStoreVehicle', function()
+        storeVeh()
+    end)
+end
 
 Config.JobVehicles = {
     ['police'] = { --job name
