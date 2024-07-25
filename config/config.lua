@@ -70,7 +70,28 @@ Config.EditHouseGarage = {
 
 Config.UseVehicleImages = true --basic vehicle image in garage menu
 Config.GetVehicleImageLink = function(vehicleModel, vehicleName)
-    return 'https://docs.fivem.net/vehicles/'..vehicleName..'.webp'
+    vehicleName = vehicleName:lower()
+
+    if LoadResourceFile('mk_utils', 'vehicleimages/'..vehicleName..'.png') then --image file exists
+        return 'nui://mk_utils/vehicleimages/'..vehicleName..'.png'
+    else
+        local imageLink = 'https://raw.githubusercontent.com/xManKindx/vehicleimages/main/png/'..vehicleName..'.png'
+        local linkPromise = promise.new()
+
+        PerformHttpRequest(imageLink, function(status, response)
+            if status == 200 then --image link was valid
+                linkPromise:resolve(imageLink)
+            else
+                if LoadResourceFile('mk_utils', 'vehicleimages/placeholder.png') then --use placeholder image from mk_utils
+                    linkPromise:resolve('nui://mk_utils/vehicleimages/placeholder.png')
+                else --use placeholder image from github
+                    linkPromise:resolve('https://raw.githubusercontent.com/xManKindx/vehicleimages/main/png/placeholder.png')
+                end
+            end
+        end, 'GET')
+
+        return Citizen.Await(linkPromise)
+    end
 end
 
 Config.GarageMenuProgressColor = 'blue'
@@ -128,11 +149,13 @@ Config.RadialMenu = {
                 end
             end
 
-            self.menuId = exports['qb-radialmenu']:AddOption({
-                title = locale('radial_main_garage'),
-                icon = self.MainIcon,
-                items = radialItems
-            })
+            if not qbRadialId then 
+                qbRadialId = exports['qb-radialmenu']:AddOption({
+                    title = locale('radial_main_garage'),
+                    icon = self.MainIcon,
+                    items = radialItems
+                }, qbRadialId)
+            end
         else
             --ox_lib radial menu
 
@@ -153,7 +176,10 @@ Config.RadialMenu = {
     ---@param garageId number Current garage id
     RemoveRadial = function(self, garageId)
         if GetResourceState('qb-radialmenu') == 'started' then
-            exports['qb-radialmenu']:RemoveOption(self.menuId)
+            if qbRadialId then 
+                exports['qb-radialmenu']:RemoveOption(qbRadialId)
+                qbRadialId = nil
+            end
         else
             --ox_lib
             lib.removeRadialItem('mk_garage_'..garageId)
@@ -214,6 +240,15 @@ Config.JobVehicles = {
             PurchaseShared = {3, 4},
             PurchasePersonal = {1, 2, 3, 4},
             Price = 10000
+        },
+        ['police4'] = {
+            UseShared = {0, 1, 2, 3, 4},
+            PurchaseShared = {3, 4},
+            PurchasePersonal = {1, 2, 3, 4},
+            Price = 5000,
+            Extras = {
+                {extraId = 1, enabled = true},
+            }
         }
     },
     ['ambulance'] = {

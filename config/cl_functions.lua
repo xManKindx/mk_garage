@@ -14,6 +14,9 @@ end
 ---@param plate string vehicle plate 
 ---@param fakePlate string|boolean fake plate if vehicle has one or false
 function hasKeys(vehicle, plate, fakePlate)
+
+    if IsThisModelABicycle(vehicle) or GetVehicleClass(vehicle) == 13 then return true end 
+
     if GetResourceState('mk_vehiclekeys') == 'started' then 
         return exports['mk_vehiclekeys']:HasKey(vehicle)
     elseif GetResourceState('qb-vehiclekeys') == 'started' then
@@ -39,6 +42,12 @@ function giveKeys(vehicle, plate, fakePlate)
             TriggerEvent('vehiclekeys:client:SetOwner', fakePlate)
         else
             TriggerEvent('vehiclekeys:client:SetOwner', plate)
+        end
+    elseif GetResourceState('Renewed-Vehiclekeys') == 'started' then 
+        if fakePlate then 
+            exports['Renewed-Vehiclekeys']:addKey(fakePlate)
+        else
+            exports['Renewed-Vehiclekeys']:addKey(plate)
         end
     else
         --custom give keys
@@ -75,7 +84,9 @@ end
 
 ---@param vehicle number vehicle entity id
 function getMods(vehicle)
-    return lib.getVehicleProperties(vehicle)
+    local mods = lib.getVehicleProperties(vehicle)
+    if mods?.plate then mods.plate = utils:removeTrailSpaces(mods.plate) end
+    return mods
 end
 
 ---@param vehicle number vehicle entity id
@@ -87,6 +98,7 @@ function setMods(vehicle, mods, plate, fakePlate)
         mods.plate = fakePlate 
         lib.setVehicleProperties(vehicle, mods)
     else
+        mods.plate = plate
         lib.setVehicleProperties(vehicle, mods)
     end
 end
