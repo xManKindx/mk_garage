@@ -17,8 +17,16 @@ function hasKeys(vehicle, plate, fakePlate)
 
     if IsThisModelABicycle(vehicle) or GetVehicleClass(vehicle) == 13 then return true end 
 
-    if GetResourceState('mk_vehiclekeys') == 'started' then 
+    if GetResourceState('mk_vehiclekeys') == 'started' then
         return exports['mk_vehiclekeys']:HasKey(vehicle)
+    elseif GetResourceState('qbx_vehiclekeys') == 'started' then
+        return exports.qbx_vehiclekeys:HasKeys(vehicle)
+    elseif GetResourceState('Renewed-Vehiclekeys') == 'started' then
+        if fakePlate then
+            return exports['Renewed-Vehiclekeys']:hasKey(fakePlate)
+        else
+            return exports['Renewed-Vehiclekeys']:hasKey(plate)
+        end
     elseif GetResourceState('qb-vehiclekeys') == 'started' then
         if fakePlate then
             return exports['qb-vehiclekeys']:HasKeys(fakePlate)
@@ -35,16 +43,16 @@ end
 ---@param plate string vehicle plate 
 ---@param fakePlate string|boolean fake plate if vehicle has one or false
 function giveKeys(vehicle, plate, fakePlate)
-    if GetResourceState('mk_vehiclekeys') == 'started' then 
+    if GetResourceState('mk_vehiclekeys') == 'started' then
         exports['mk_vehiclekeys']:AddKey(vehicle)
-    elseif GetResourceState('qb-vehiclekeys') == 'started' then 
+    elseif GetResourceState('qb-vehiclekeys') == 'started' or GetResourceState('qbx_vehiclekeys') == 'started' then
         if fakePlate then
             TriggerEvent('vehiclekeys:client:SetOwner', fakePlate)
         else
             TriggerEvent('vehiclekeys:client:SetOwner', plate)
         end
-    elseif GetResourceState('Renewed-Vehiclekeys') == 'started' then 
-        if fakePlate then 
+    elseif GetResourceState('Renewed-Vehiclekeys') == 'started' then
+        if fakePlate then
             exports['Renewed-Vehiclekeys']:addKey(fakePlate)
         else
             exports['Renewed-Vehiclekeys']:addKey(plate)
